@@ -1,6 +1,7 @@
 """掃 git log,parse 成結構化 commit 資料。只管「怎麼從 git 拿到 commit 資料」,不碰 SQLite。"""
 from __future__ import annotations
 
+import os
 import subprocess
 from dataclasses import dataclass, field
 
@@ -8,6 +9,14 @@ from dataclasses import dataclass, field
 _START = "\x02"  # 一筆 commit 的起始
 _FIELD = "\x1f"  # 欄位分隔
 _END = "\x03"  # commit 中繼資料結束,後面接 numstat 行
+
+
+class GitNotFoundError(Exception):
+    """系統上找不到 git 執行檔。訊息刻意精簡,不附帶路徑或原始指令。"""
+
+
+class GitCommandError(Exception):
+    """git 指令執行失敗(例如目標路徑不是 git repo)。訊息刻意精簡,不附帶路徑或原始指令。"""
 
 
 @dataclass
@@ -28,16 +37,49 @@ class Commit:
     files: list[FileChange] = field(default_factory=list)
 
 
+def _run_git(args: list[str], repo_path: str) -> subprocess.CompletedProcess:
+    """跑一條 git 指令,只把「找不到 git 執行檔」轉成明確例外;成功與否(returncode)
+    交給呼叫者自己判斷,呼叫者才知道怎麼描述失敗才對使用者有意義。
+    """
+    try:
+        return subprocess.run(
+            ["git", *args],
+            cwd=repo_path,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError as exc:
+        raise GitNotFoundError("git executable not found") from exc
+    except NotADirectoryError as exc:
+        raise GitCommandError("repo path is not a valid directory") from exc
+
+
+def resolve_git_dir(repo_path: str) -> str:
+    """回傳 git metadata 目錄(.git)的絕對路徑,用 `git rev-parse --git-dir` 取得,
+    而不是假設 `.git` 一定是目錄——worktree 底下 `.git` 是指向真正 gitdir 的檔案,
+    子目錄底下則根本沒有 `.git`,兩種情況 git 自己都能正確解析,不用我們猜。
+    """
+    result = _run_git(["rev-parse", "--git-dir"], repo_path)
+    if result.returncode != 0:
+        raise GitCommandError("repo path is not a valid git repository")
+    git_dir = result.stdout.strip()
+    if not os.path.isabs(git_dir):
+        git_dir = os.path.normpath(os.path.join(os.path.abspath(repo_path), git_dir))
+    else:
+        git_dir = os.path.normpath(git_dir)
+    return git_dir
+
+
 def scan(repo_path: str) -> list[Commit]:
-    """跑 git log,回傳該 repo 全部 commit(含檔案異動)。"""
+    """跑 git log,回傳該 repo 全部 commit(含檔案異動)。
+
+    repo_path 可以是 repo 根目錄、子目錄,或 git worktree ——不預先檢查 `.git`
+    是否存在,讓 git 自己判斷,失敗時轉成明確例外(GitNotFoundError/GitCommandError)。
+    """
     fmt = f"{_START}%H{_FIELD}%an{_FIELD}%ae{_FIELD}%aI{_FIELD}%s{_FIELD}%b{_END}"
-    result = subprocess.run(
-        ["git", "log", "--numstat", f"--pretty=format:{fmt}"],
-        cwd=repo_path,
-        capture_output=True,
-        text=True,
-        check=True,
-    )
+    result = _run_git(["log", "--numstat", f"--pretty=format:{fmt}"], repo_path)
+    if result.returncode != 0:
+        raise GitCommandError("git log failed for this repo path")
     return _parse(result.stdout)
 
 
