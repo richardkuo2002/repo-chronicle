@@ -1,0 +1,76 @@
+name: Bug report
+description: Something in Repo Chronicle doesn't work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please **do not** paste private repository contents, secrets, or
+        credentials below. If reproducing needs a real repository's history,
+        use `examples/create_fixture_repo.py` to build a minimal repo that
+        reproduces the issue instead, and share that.
+
+  - type: input
+    id: version
+    attributes:
+      label: Repo Chronicle version
+      description: Output of `python -c "import repo_chronicle; print(repo_chronicle.__version__)"`
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "macOS 15 / Ubuntu 24.04 / Windows 11"
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      description: Output of `python3 --version`
+      placeholder: "Python 3.12.4"
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Exact command
+      description: The exact `repo-chronicle ...` command you ran.
+      render: bash
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Output / error (sanitized)
+      description: >-
+        Stdout/stderr you got. Remove or replace anything from your own
+        repository's commit history that shouldn't be shared publicly
+        (paths, commit messages, etc.) before pasting.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: >-
+        Ideally as a small script using `examples/create_fixture_repo.py`,
+        or clear steps against a `git init`'d throwaway repo.
+      render: text
+    validations:
+      required: true

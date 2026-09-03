@@ -1,0 +1,44 @@
+name: Feature request
+description: Suggest something Repo Chronicle should do
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Repo Chronicle stays deliberately small (see
+        [ROADMAP.md](../../ROADMAP.md) for what's explicitly out of scope —
+        no MCP server, no vector DB/RAG, no code graph, no hosted service,
+        no required GateRail coupling). A request that fits that shape is
+        much more likely to land.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you running into?
+      description: What are you trying to do that the current CLI/output doesn't support?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: What would the command/flag/output look like?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: compat
+    attributes:
+      label: Does this change existing CLI arguments or the Markdown output structure for normal input?
+      options:
+        - "No — purely additive"
+        - "Yes — it would change existing behavior"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
