@@ -1,0 +1,13 @@
+[project]
+name = "repo-chronicle"
+version = "0.1.0"
+description = "Local-first Git history indexer that produces commit-evidenced Markdown context packs for AI coding agents."
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+repo-chronicle = "repo_chronicle.cli:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
