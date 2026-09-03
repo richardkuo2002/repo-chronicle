@@ -10,6 +10,8 @@ from . import db as db_mod
 _TEST_PATTERNS = [
     "test_{name}{ext}",
     "{name}_test{ext}",
+    "{name}.test{ext}",
+    "{name}.spec{ext}",
 ]
 
 
