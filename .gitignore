@@ -1,5 +1,6 @@
 .venv/
 __pycache__/
 *.egg-info/
-.repo_chronicle.sqlite3
+# repo_chronicle.sqlite3 現在存在 <repo>/.git/ 底下(git metadata 目錄本身
+# 就不會被 git 追蹤),不再需要對它額外加 .gitignore 規則。
 TODO.local.md

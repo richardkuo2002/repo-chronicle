@@ -127,6 +127,7 @@ def _self_check() -> None:
     readme_entry_missing = all(f.path != "README.md" for f in result.affected_files)
     assert readme_entry_missing  # 不相關的 commit 不該混進來
 
+    conn.close()
     print("explain._self_check: OK")
 
 

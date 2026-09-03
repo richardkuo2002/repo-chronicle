@@ -158,6 +158,7 @@ def _self_check() -> None:
     assert [r["path"] for r in files_for_commit(conn, "h1")] == ["src/auth/token.py"]
     assert set(all_known_paths(conn)) == {"src/auth/token.py", "README.md"}
 
+    conn.close()
     print("db._self_check: OK")
 
 
