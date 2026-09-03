@@ -37,42 +37,45 @@ repo (already in `.gitignore`, safe from accidental commits).
 
 ## Example output
 
-The generated Markdown itself is currently in Traditional Chinese (section
-headers included) — this is the real, unedited output:
+The tool currently renders Markdown section headers in Traditional Chinese
+(see the [Chinese README](README.zh-TW.md) for the real, unedited output).
+Below is an English translation for readability:
 
 ```markdown
 # Context Pack: auth
 
-生成時間:2024-11-03 10:00 | Repo: `/path/to/project` | 命中 commit 數:2
+Generated: 2024-11-03 10:00 | Repo: `/path/to/project` | Matched commits: 2
 
-## 演進脈絡(依時間排序)
+## Evolution (newest first)
 
 ### 2024-11-02 `a1b2c3d1e2` — Refactor auth token refresh logic
-> 修正 refresh token 過期判斷用了 <= 導致提早一秒失效...
+> Fixed the refresh token expiry check using <= instead of <, causing tokens
+> to expire one second early...
 
-受影響檔案:
+Affected files:
 - `src/auth/token.py` (+42/-11)
 - `src/auth/middleware.py` (+8/-2)
 
 ---
 
-## 可能受影響的檔案(依相關 commit 出現次數排序)
+## Likely affected files (by occurrence count across matched commits)
 
-| 檔案路徑 | 出現次數 | 最近變動 commit |
+| File | Occurrences | Most recent commit |
 |---|---|---|
 | `src/auth/token.py` | 6 | `a1b2c3d1e2` |
 
-## 建議執行的測試
+## Suggested tests to run
 
-- `tests/auth/test_token.py`(對應 `src/auth/token.py`)
-- ⚠ `src/auth/session.py` 未偵測到對應測試檔,建議人工確認
+- `tests/auth/test_token.py` (for `src/auth/token.py`)
+- ⚠ no matching test file found for `src/auth/session.py` — please confirm manually
 
-## 附註
+## Notes
 
-本報告純規則式產生,未經語意分析,請以 commit hash 為準自行查證。
+This report is rule-based, not semantic analysis — verify against the commit
+hashes yourself.
 ```
 
-Localizing the render output itself (e.g. an `--lang en` flag) is a possible
+An `--lang en` flag to make the actual render output English is a possible
 future improvement — not implemented yet.
 
 ## Current limits (v1, intentionally deferred)
