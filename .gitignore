@@ -2,3 +2,4 @@
 __pycache__/
 *.egg-info/
 .repo_chronicle.sqlite3
+TODO.local.md
