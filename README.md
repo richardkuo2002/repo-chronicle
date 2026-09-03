@@ -1,13 +1,20 @@
 # Repo Chronicle
 
-Local-first Git 歷史索引工具。掃描任意 repo 的 commit 歷史存進本地 SQLite，輸出有
-commit 證據可追溯的 Markdown context pack，供 AI coding agent（Claude Code /
-Codex / Cursor）在修改舊專案前快速理解某功能的演進脈絡、過去的取捨、可能受影響的
-檔案與應執行的測試——不必靠模型猜測或重讀整個 codebase。
+A local-first Git history indexer. It scans any repo's commit history into a
+local SQLite database and produces a commit-evidenced Markdown context pack
+for AI coding agents (Claude Code / Codex / Cursor) — so you can understand
+how a feature evolved, what trade-offs were made, which files are likely
+affected, and which tests to run, before touching legacy code, without
+guessing or re-reading the whole codebase.
 
-純規則式產生（無 LLM、無 embedding、無網路呼叫），資料全存在你自己的機器上。
+Rule-based only (no LLM, no embeddings, no network calls). All data stays on
+your machine.
 
-## 安裝
+> local-first 的 Git 歷史索引工具：把 commit 歷史掃進本地 SQLite，輸出有
+> commit 證據可追溯的 Markdown context pack，讓 AI coding agent 在修改舊
+> 專案前快速理解演進脈絡，不必靠模型猜測。純規則式，無 LLM、無網路呼叫。
+
+## Install
 
 ```bash
 git clone https://github.com/richardkuo2002/repo-chronicle.git
@@ -15,21 +22,22 @@ cd repo-chronicle
 pip install -e .
 ```
 
-## 使用
+## Usage
 
 ```bash
 repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N]
 ```
 
-- `<keyword>`：功能名稱或檔案路徑片段（會同時比對 commit message 與檔案路徑）
-- `--repo`：目標 git repo 路徑，預設當前目錄
-- `--out`：輸出檔案，預設印到 stdout
-- `--top`：受影響檔案列出的數量上限，預設 15
+- `<keyword>`: a feature name or file path fragment (matched against both
+  commit messages and file paths)
+- `--repo`: target git repo path, defaults to the current directory
+- `--out`: output file, defaults to stdout
+- `--top`: max number of affected files listed, defaults to 15
 
-每次執行會在目標 repo 下建立/重建 `.repo_chronicle.sqlite3` 索引檔（已加進
-`.gitignore`，不會被誤 commit）。
+Each run builds/rebuilds a `.repo_chronicle.sqlite3` index inside the target
+repo (already in `.gitignore`, safe from accidental commits).
 
-## 輸出範例
+## Example output
 
 ```markdown
 # Context Pack: auth
@@ -63,15 +71,22 @@ repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N]
 本報告純規則式產生,未經語意分析,請以 commit hash 為準自行查證。
 ```
 
-## 目前的限制（v1，刻意先不做）
+*(the generated Markdown itself is in Traditional Chinese; the tool and this
+README are in English — feel free to open a PR to localize the output too)*
 
-- 不做語意分析或摘要，「修改原因」就是 commit message 原文
-- 不做跨 commit 的共同變更（co-change）獨立分析，只在單次查詢時即席統計
-- 不支援多 repo、remote repo、增量索引（每次全量重建）
-- 測試檔猜測純靠檔名規則（`test_x.py` / `x_test.py` / `x.test.js` / `x.spec.js`），
-  猜不到就明確標註「建議人工確認」，不會假裝很準
+## Current limits (v1, intentionally deferred)
 
-歡迎 issue / PR。
+- No semantic analysis or summarization — "why it changed" is the raw commit
+  message.
+- No standalone co-change table — related files are computed on the fly per
+  query, not pre-aggregated.
+- No multi-repo, no remote repos, no incremental indexing (full rescan every
+  run).
+- Test-file guessing is filename-pattern only (`test_x.py` / `x_test.py` /
+  `x.test.js` / `x.spec.js`); when it can't guess, it says so explicitly
+  instead of pretending to be accurate.
+
+Issues and PRs welcome.
 
 ## License
 
