@@ -1,5 +1,7 @@
 # Repo Chronicle
 
+[English](README.md) | [繁體中文](README.zh-TW.md)
+
 A local-first Git history indexer. It scans any repo's commit history into a
 local SQLite database and produces a commit-evidenced Markdown context pack
 for AI coding agents (Claude Code / Codex / Cursor) — so you can understand
@@ -9,10 +11,6 @@ guessing or re-reading the whole codebase.
 
 Rule-based only (no LLM, no embeddings, no network calls). All data stays on
 your machine.
-
-> local-first 的 Git 歷史索引工具：把 commit 歷史掃進本地 SQLite，輸出有
-> commit 證據可追溯的 Markdown context pack，讓 AI coding agent 在修改舊
-> 專案前快速理解演進脈絡，不必靠模型猜測。純規則式，無 LLM、無網路呼叫。
 
 ## Install
 
@@ -38,6 +36,9 @@ Each run builds/rebuilds a `.repo_chronicle.sqlite3` index inside the target
 repo (already in `.gitignore`, safe from accidental commits).
 
 ## Example output
+
+The generated Markdown itself is currently in Traditional Chinese (section
+headers included) — this is the real, unedited output:
 
 ```markdown
 # Context Pack: auth
@@ -71,8 +72,8 @@ repo (already in `.gitignore`, safe from accidental commits).
 本報告純規則式產生,未經語意分析,請以 commit hash 為準自行查證。
 ```
 
-*(the generated Markdown itself is in Traditional Chinese; the tool and this
-README are in English — feel free to open a PR to localize the output too)*
+Localizing the render output itself (e.g. an `--lang en` flag) is a possible
+future improvement — not implemented yet.
 
 ## Current limits (v1, intentionally deferred)
 
