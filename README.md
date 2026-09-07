@@ -1,5 +1,8 @@
 # Repo Chronicle
 
+[![CI](https://github.com/richardkuo2002/repo-chronicle/actions/workflows/ci.yml/badge.svg)](https://github.com/richardkuo2002/repo-chronicle/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > Local-first Git history context packs for understanding a repository before changing it.
 
 [English](README.md) | [繁體中文](README.zh-TW.md)
@@ -61,7 +64,10 @@ repo-chronicle explain report --repo <path printed above>
 
 Real output from that exact command (see
 [`examples/walkthrough.md`](examples/walkthrough.md) for the full walkthrough
-and what each section means):
+and what each section means). **Note:** the generated section headers below
+(演進脈絡, 可能受影響的檔案, 建議執行的測試, 附註) are currently fixed in
+Traditional Chinese regardless of your system locale — this is a known,
+not-yet-configurable default, not a display error:
 
 ```markdown
 # Context Pack: report
