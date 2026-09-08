@@ -64,10 +64,10 @@ repo-chronicle explain report --repo <path printed above>
 
 Real output from that exact command (see
 [`examples/walkthrough.md`](examples/walkthrough.md) for the full walkthrough
-and what each section means). **Note:** the generated section headers below
-(演進脈絡, 可能受影響的檔案, 建議執行的測試, 附註) are currently fixed in
-Traditional Chinese regardless of your system locale — this is a known,
-not-yet-configurable default, not a display error:
+and what each section means). The section headers below are Traditional
+Chinese by default; pass `--lang en` for English section headers instead
+(commit subjects/bodies are always reproduced verbatim in their original
+language either way):
 
 ```markdown
 # Context Pack: report
@@ -127,7 +127,7 @@ repo-chronicle explain auth --repo /path/to/your/repo --out pack.md
 ## Command reference
 
 ```text
-repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N]
+repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N] [--lang zh-TW|en]
 ```
 
 | Argument | Meaning | Default |
@@ -136,6 +136,7 @@ repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N]
 | `--repo` | path to the target repository (root, a subdirectory of one, or a worktree) | `.` |
 | `--out` | write the pack to this file instead of stdout | stdout |
 | `--top` | max rows in the "likely affected files" table | `15` |
+| `--lang` | section-header language for the generated report (`zh-TW` or `en`); never affects commit subjects/bodies, which are always reproduced verbatim | `zh-TW` |
 
 `--out FILE` overwrites an existing file without confirmation. Parent
 directories are not created automatically, and `FILE` may be any writable

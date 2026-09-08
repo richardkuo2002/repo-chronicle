@@ -54,7 +54,7 @@ def _cmd_explain(args: argparse.Namespace) -> int:
         db_mod.index_repo(conn, commits)
 
         result = explain(conn, args.keyword, top_n=args.top)
-        output = render(result, repo_path)
+        output = render(result, repo_path, lang=args.lang)
 
     if args.out:
         try:
@@ -78,6 +78,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_explain.add_argument("--repo", default=".", help="目標 git repo 路徑(預設當前目錄)")
     p_explain.add_argument("--out", default=None, help="輸出檔案路徑(預設印到 stdout)")
     p_explain.add_argument("--top", type=int, default=15, help="受影響檔案列出的數量上限(預設 15)")
+    p_explain.add_argument(
+        "--lang", choices=["zh-TW", "en"], default="zh-TW",
+        help="產生報告的區塊標題語言(預設 zh-TW,不影響 commit 原文內容)",
+    )
     p_explain.set_defaults(func=_cmd_explain)
 
     return parser

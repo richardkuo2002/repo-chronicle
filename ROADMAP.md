@@ -15,10 +15,6 @@ listed as explicitly out of scope, not as a future phase.
 
 ## Near term (plausible, not scheduled)
 
-- **Output-language flag.** The generated Markdown's section headers are
-  currently Traditional Chinese only; an `--lang en|zh-TW` (or similar) is
-  the likely shape, kept as two plain string templates rather than a
-  translation framework.
 - **Optional output redaction/exclusion controls.** v0.1.0 reproduces commit
   subjects/bodies verbatim with no filtering (documented in
   [SECURITY.md](SECURITY.md)); an opt-in way to exclude paths or redact

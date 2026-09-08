@@ -14,6 +14,45 @@ from .explain import ExplainResult
 
 _MAX_COMMITS_SHOWN = 20  # 避免關鍵字太常見時整份報告爆長,超過的部分只算在統計裡
 
+# 兩組純字串模板,不是翻譯框架——只覆蓋固定的區塊標題/提示文字,不覆蓋 commit
+# 內容本身(那是 git 歷史的原文,不屬於「介面語言」)。
+_LABELS = {
+    "zh-TW": {
+        "generated_at": "生成時間",
+        "repo": "Repo",
+        "hits": "命中 commit 數",
+        "evolution_header": "## 演進脈絡(依時間排序)",
+        "no_commits": "(未找到相關 commit)",
+        "affected_files_label": "受影響檔案:",
+        "omitted": "...(其餘 {n} 筆省略,詳見資料庫)",
+        "affected_section_header": "## 可能受影響的檔案(依相關 commit 出現次數排序)",
+        "table_header": "| 檔案路徑 | 出現次數 | 最近變動 commit |",
+        "none": "(無)",
+        "tests_section_header": "## 建議執行的測試",
+        "test_line": "{test}(對應 {file})",
+        "no_test_found": "⚠ {file} 未偵測到對應測試檔,建議人工確認",
+        "notes_section_header": "## 附註",
+        "notes_text": "本報告純規則式產生,未經語意分析,請以 commit hash 為準自行查證。",
+    },
+    "en": {
+        "generated_at": "Generated",
+        "repo": "Repo",
+        "hits": "Matched commits",
+        "evolution_header": "## Evolution (chronological)",
+        "no_commits": "(no matching commits found)",
+        "affected_files_label": "Files touched:",
+        "omitted": "...({n} more omitted, see local index)",
+        "affected_section_header": "## Likely Affected Files (by matched-commit frequency)",
+        "table_header": "| File | Occurrences | Sample commit |",
+        "none": "(none)",
+        "tests_section_header": "## Suggested Tests to Run",
+        "test_line": "{test} (for {file})",
+        "no_test_found": "⚠ no matching test file found for {file} — verify manually",
+        "notes_section_header": "## Notes",
+        "notes_text": "This report is rule-based, not semantic analysis. Verify against the commit hashes shown.",
+    },
+}
+
 
 def _escape_backticks(text: str) -> str:
     """在純文字位置(標題、引言)跳脫反引號,避免奇數個反引號意外開啟一段沒有
@@ -53,19 +92,20 @@ def _table_cell(text: str) -> str:
     return _code_span(text)
 
 
-def render(result: ExplainResult, repo_path: str) -> str:
+def render(result: ExplainResult, repo_path: str, lang: str = "zh-TW") -> str:
+    t = _LABELS[lang]
     now = _dt.datetime.now().strftime("%Y-%m-%d %H:%M")
     lines = [
         f"# Context Pack: {result.keyword}",
         "",
-        f"生成時間:{now} | Repo: {_code_span(repo_path)} | 命中 commit 數:{len(result.commits)}",
+        f"{t['generated_at']}:{now} | {t['repo']}: {_code_span(repo_path)} | {t['hits']}:{len(result.commits)}",
         "",
-        "## 演進脈絡(依時間排序)",
+        t["evolution_header"],
         "",
     ]
 
     if not result.commits:
-        lines.append("(未找到相關 commit)")
+        lines.append(t["no_commits"])
     for c in result.commits[:_MAX_COMMITS_SHOWN]:
         date = c.committed_at.split("T")[0]
         lines.append(f"### {date} {_code_span(c.hash[:10])} — {_escape_backticks(c.subject)}")
@@ -74,46 +114,46 @@ def render(result: ExplainResult, repo_path: str) -> str:
             lines.append(f"> {body_preview}")
         if c.files:
             lines.append("")
-            lines.append("受影響檔案:")
+            lines.append(t["affected_files_label"])
             for f in c.files:
                 add = f["additions"] if f["additions"] is not None else "?"
                 dele = f["deletions"] if f["deletions"] is not None else "?"
                 lines.append(f"- {_code_span(f['path'])} (+{add}/-{dele})")
         lines.append("")
     if len(result.commits) > _MAX_COMMITS_SHOWN:
-        lines.append(f"...(其餘 {len(result.commits) - _MAX_COMMITS_SHOWN} 筆省略,詳見資料庫)")
+        lines.append(t["omitted"].format(n=len(result.commits) - _MAX_COMMITS_SHOWN))
         lines.append("")
 
     lines.append("---")
     lines.append("")
-    lines.append("## 可能受影響的檔案(依相關 commit 出現次數排序)")
+    lines.append(t["affected_section_header"])
     lines.append("")
     if result.affected_files:
-        lines.append("| 檔案路徑 | 出現次數 | 最近變動 commit |")
+        lines.append(t["table_header"])
         lines.append("|---|---|---|")
         for f in result.affected_files:
             lines.append(
                 f"| {_table_cell(f.path)} | {f.occurrences} | {_table_cell(f.sample_hash[:10])} |"
             )
     else:
-        lines.append("(無)")
+        lines.append(t["none"])
     lines.append("")
 
-    lines.append("## 建議執行的測試")
+    lines.append(t["tests_section_header"])
     lines.append("")
     for f in result.affected_files:
         if f.test_candidates:
-            for t in f.test_candidates:
-                lines.append(f"- {_code_span(t)}(對應 {_code_span(f.path)})")
+            for c_ in f.test_candidates:
+                lines.append(f"- {t['test_line'].format(test=_code_span(c_), file=_code_span(f.path))}")
         else:
-            lines.append(f"- ⚠ {_code_span(f.path)} 未偵測到對應測試檔,建議人工確認")
+            lines.append(f"- {t['no_test_found'].format(file=_code_span(f.path))}")
     if not result.affected_files:
-        lines.append("(無)")
+        lines.append(t["none"])
     lines.append("")
 
-    lines.append("## 附註")
+    lines.append(t["notes_section_header"])
     lines.append("")
-    lines.append("本報告純規則式產生,未經語意分析,請以 commit hash 為準自行查證。")
+    lines.append(t["notes_text"])
     lines.append("")
 
     return "\n".join(lines)

@@ -4,7 +4,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
 
-No unreleased changes yet.
+### Added
+
+- `--lang zh-TW|en` flag: switches the generated report's section headers
+  between Traditional Chinese (default, unchanged) and English. Commit
+  subjects/bodies and file paths are always reproduced verbatim regardless
+  of this setting.
 
 ## [0.1.0] - 2026-09-04
 
