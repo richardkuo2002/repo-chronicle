@@ -9,67 +9,11 @@
 
 ![Git history flowing through a keyword match into a commit-evidenced Markdown context pack](docs/hero.svg)
 
-## Why it exists
+## See it in action
 
-A coding assistant or a new contributor can read the current files in a repo,
-but not the decisions behind them. Why does this function work the way it
-does? What was tried and reverted? Which files tend to change together? Raw
-`git log` has the answer somewhere in it, but it's too broad and unstructured
-to hand to a focused change — you end up either skipping the history or
-reading commits by hand.
-
-## What Repo Chronicle produces
-
-Run one command against a keyword, and Repo Chronicle scans local commit
-history, picks out the commits that actually mention it (in the message or
-in a changed file's path), and writes a Markdown context pack: which commits
-are relevant, what they changed, which files come up often together, and
-which test files look related. Every claim in the pack carries the commit
-hash it came from, so you can check it against `git show` yourself.
-
-## What it does not do
-
-- It does not send repository data anywhere. Everything runs as local
-  `git log` subprocess calls plus a local SQLite index. Repo Chronicle
-  currently invokes only local Git commands and does not include a network
-  client in its Python source. `tests/test_no_network.py` statically checks
-  for known networking imports; it is not an operating-system network
-  sandbox.
-- It does not make implementation decisions. It surfaces history; you (or
-  your coding assistant) still decide what to do with it.
-- It does not guarantee it found all relevant history — it's a keyword match
-  against commit messages and file paths, not a semantic search.
-- It does not include diff content. It reports which files changed and how
-  many lines were added/removed, never the actual code from the diff.
-- It reproduces commit subjects and bodies **verbatim**. If a repository's
-  history ever had a secret in a commit message, a matching query will
-  surface it in the generated pack — review output before sharing it
-  externally. See [SECURITY.md](SECURITY.md).
-- It does not replace code review, tests, or your project's own docs.
-
-## Quick start
-
-```bash
-git clone https://github.com/richardkuo2002/repo-chronicle.git
-cd repo-chronicle
-pip install -e .
-```
-
-Try it against a disposable, deterministic fixture repo instead of a real
-one first:
-
-```bash
-python examples/create_fixture_repo.py --keep
-# prints the fixture's path and commit list, then leaves it on disk
-repo-chronicle explain report --repo <path printed above>
-```
-
-Real output from that exact command (see
-[`examples/walkthrough.md`](examples/walkthrough.md) for the full walkthrough
-and what each section means). Section headers are English by default; pass
-`--lang zh-TW` for Traditional Chinese headers instead (commit
-subjects/bodies are always reproduced verbatim in their original language
-either way):
+No install needed to look — this is real output from
+`repo-chronicle explain report` against the fixture repo in
+[`examples/`](examples/walkthrough.md), not a mockup:
 
 ```markdown
 # Context Pack: report
@@ -114,6 +58,92 @@ Files touched:
 
 This report is rule-based, not semantic analysis. Verify against the commit hashes shown.
 ```
+
+Every line above traces to a real commit SHA in a real (fixture) repo — see
+[`examples/walkthrough.md`](examples/walkthrough.md) for the full walkthrough
+and what each section means.
+
+## Why it exists
+
+A coding assistant or a new contributor can read the current files in a repo,
+but not the decisions behind them. Why does this function work the way it
+does? What was tried and reverted? Which files tend to change together? Raw
+`git log` has the answer somewhere in it, but it's too broad and unstructured
+to hand to a focused change — you end up either skipping the history or
+reading commits by hand.
+
+## What Repo Chronicle produces
+
+Run one command against a keyword, and Repo Chronicle scans local commit
+history, picks out the commits that actually mention it (in the message or
+in a changed file's path), and writes a Markdown context pack: which commits
+are relevant, what they changed, which files come up often together, and
+which test files look related. Every claim in the pack carries the commit
+hash it came from, so you can check it against `git show` yourself.
+
+## What it does not do
+
+- It does not send repository data anywhere. Everything runs as local
+  `git log` subprocess calls plus a local SQLite index. Repo Chronicle
+  currently invokes only local Git commands and does not include a network
+  client in its Python source. `tests/test_no_network.py` statically checks
+  for known networking imports; it is not an operating-system network
+  sandbox.
+- It does not make implementation decisions. It surfaces history; you (or
+  your coding assistant) still decide what to do with it.
+- It does not guarantee it found all relevant history — it's a keyword match
+  against commit messages and file paths, not a semantic search.
+- It does not include diff content. It reports which files changed and how
+  many lines were added/removed, never the actual code from the diff.
+- It reproduces commit subjects and bodies **verbatim**. If a repository's
+  history ever had a secret in a commit message, a matching query will
+  surface it in the generated pack — review output before sharing it
+  externally. See [SECURITY.md](SECURITY.md).
+- It does not replace code review, tests, or your project's own docs.
+
+## How this differs from asking an LLM to summarize the repo
+
+| | Repo Chronicle | `git log` by hand | Pasting `git log` into an LLM |
+|---|---|---|---|
+| Sends your code or history anywhere | No — local only | No | Yes |
+| Every claim traces to a commit SHA | Yes, always | Yes, but you do the digging | No — can paraphrase or invent |
+| Structured, keyword-scoped output | Yes | No | Depends on the prompt |
+| Setup cost | One command | None | An API key + a prompt each time |
+
+The trade-off: it's substring matching, not understanding — see
+[Limitations](#limitations) below. It's a fast, honest first pass you (or
+your coding assistant) build on, not a replacement for reading the matched
+commits yourself.
+
+## Quick start
+
+Try without cloning:
+
+```bash
+pip install git+https://github.com/richardkuo2002/repo-chronicle.git
+```
+
+Or clone it:
+
+```bash
+git clone https://github.com/richardkuo2002/repo-chronicle.git
+cd repo-chronicle
+pip install -e .
+```
+
+Try it against a disposable, deterministic fixture repo instead of a real
+one first:
+
+```bash
+python examples/create_fixture_repo.py --keep
+# prints the fixture's path and commit list, then leaves it on disk
+repo-chronicle explain report --repo <path printed above>
+```
+
+That's the exact command behind the [See it in action](#see-it-in-action)
+output above. Section headers are English by default; pass `--lang zh-TW`
+for Traditional Chinese headers instead (commit subjects/bodies are always
+reproduced verbatim in their original language either way).
 
 On a real repository:
 

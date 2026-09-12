@@ -6,42 +6,11 @@
 
 ![Git history 經過關鍵字比對後,產出附帶 commit 佐證的 Markdown context pack](docs/hero.svg)
 
-## 為什麼需要它
+## 實際成品長怎樣
 
-AI coding agent 或新加入的貢獻者能讀到 repo 目前的檔案內容,但讀不到「這段程式碼為什麼長這樣」的歷史脈絡:這個函式為什麼這樣寫?之前試過什麼、後來又改掉了?哪些檔案常常一起變動?這些答案其實都在 `git log` 裡,但原始的 `git log` 太廣、太沒結構,沒辦法直接拿給一次聚焦的修改用——結果通常是乾脆跳過歷史,或是自己一筆一筆翻 commit。
-
-## Repo Chronicle 產出什麼
-
-對一個關鍵字下一條指令,Repo Chronicle 就會掃描本地 commit 歷史,挑出真的提到這個關鍵字的 commit(訊息或變動檔案路徑命中皆算),寫出一份 Markdown context pack:哪些 commit 相關、改了什麼、哪些檔案常一起出現、哪些測試檔可能對應得上。每一條資訊都附著 commit hash,你可以自己拿去跟 `git show` 對照查證。
-
-## 它不做什麼
-
-- 不會把 repo 資料送到任何地方。全部運算都是本地的 `git log` subprocess 呼叫加上本地 SQLite 索引。Repo Chronicle 目前只呼叫本機 Git 指令,Python 原始碼中未包含網路用戶端。`tests/test_no_network.py` 會以靜態方式檢查已知的網路相關 import;它不是作業系統層級的網路隔離機制。
-- 不會替你做實作決策。它只負責把歷史攤開給你(或你的 coding agent)看,決定怎麼做還是你的事。
-- 不保證找到全部相關歷史——這是關鍵字比對,不是語意搜尋。
-- 不含 diff 實際內容。只會告訴你哪些檔案變動、加減幾行,不會附上 diff 裡的程式碼本身。
-- commit subject 與 body 會**原文重現**。如果 repo 歷史裡曾經在 commit message 留下機密,符合查詢條件時就會出現在產生的 pack 裡——分享輸出前請自己先看過。詳見 [SECURITY.md](SECURITY.md)。
-- 不能取代 code review、測試,或專案自己的文件。
-
-## 快速開始
-
-```bash
-git clone https://github.com/richardkuo2002/repo-chronicle.git
-cd repo-chronicle
-pip install -e .
-```
-
-先對一個一次性、決定性的 fixture repo 試試看,不用拿真的專案冒險:
-
-```bash
-python examples/create_fixture_repo.py --keep
-# 印出 fixture repo 的路徑與 commit 清單,並保留在磁碟上
-repo-chronicle explain report --repo <上面印出的路徑>
-```
-
-以下是加上 `--lang zh-TW` 之後那條指令的真實輸出(區塊標題預設為英文,
-`--lang zh-TW` 切換為繁體中文;完整 walkthrough 與每個區塊代表的意思見
-[`examples/walkthrough.md`](examples/walkthrough.md)):
+不用安裝就能先看:以下是對 [`examples/`](examples/walkthrough.md) 裡的 fixture repo
+真的加上 `--lang zh-TW` 跑一次 `repo-chronicle explain report` 的輸出,不是示意圖
+(commit subject/body 一律保持原文,只有區塊標題會依 `--lang` 切換):
 
 ```markdown
 # Context Pack: report
@@ -86,6 +55,66 @@ repo-chronicle explain report --repo <上面印出的路徑>
 
 本報告純規則式產生,未經語意分析,請以 commit hash 為準自行查證。
 ```
+
+上面每一行都能對回一個真實(fixture)repo 裡真實的 commit SHA——完整
+walkthrough 與每個區塊代表的意思見 [`examples/walkthrough.md`](examples/walkthrough.md)。
+
+## 為什麼需要它
+
+AI coding agent 或新加入的貢獻者能讀到 repo 目前的檔案內容,但讀不到「這段程式碼為什麼長這樣」的歷史脈絡:這個函式為什麼這樣寫?之前試過什麼、後來又改掉了?哪些檔案常常一起變動?這些答案其實都在 `git log` 裡,但原始的 `git log` 太廣、太沒結構,沒辦法直接拿給一次聚焦的修改用——結果通常是乾脆跳過歷史,或是自己一筆一筆翻 commit。
+
+## Repo Chronicle 產出什麼
+
+對一個關鍵字下一條指令,Repo Chronicle 就會掃描本地 commit 歷史,挑出真的提到這個關鍵字的 commit(訊息或變動檔案路徑命中皆算),寫出一份 Markdown context pack:哪些 commit 相關、改了什麼、哪些檔案常一起出現、哪些測試檔可能對應得上。每一條資訊都附著 commit hash,你可以自己拿去跟 `git show` 對照查證。
+
+## 它不做什麼
+
+- 不會把 repo 資料送到任何地方。全部運算都是本地的 `git log` subprocess 呼叫加上本地 SQLite 索引。Repo Chronicle 目前只呼叫本機 Git 指令,Python 原始碼中未包含網路用戶端。`tests/test_no_network.py` 會以靜態方式檢查已知的網路相關 import;它不是作業系統層級的網路隔離機制。
+- 不會替你做實作決策。它只負責把歷史攤開給你(或你的 coding agent)看,決定怎麼做還是你的事。
+- 不保證找到全部相關歷史——這是關鍵字比對,不是語意搜尋。
+- 不含 diff 實際內容。只會告訴你哪些檔案變動、加減幾行,不會附上 diff 裡的程式碼本身。
+- commit subject 與 body 會**原文重現**。如果 repo 歷史裡曾經在 commit message 留下機密,符合查詢條件時就會出現在產生的 pack 裡——分享輸出前請自己先看過。詳見 [SECURITY.md](SECURITY.md)。
+- 不能取代 code review、測試,或專案自己的文件。
+
+## 跟「把 git log 丟給 LLM 摘要」有什麼不同
+
+| | Repo Chronicle | 自己翻 `git log` | 把 `git log` 貼給 LLM |
+|---|---|---|---|
+| 會不會把程式碼或歷史送出去 | 不會,純本地 | 不會 | 會 |
+| 每個結論都能回溯到 commit SHA | 是,永遠都能 | 是,但要自己去挖 | 否——可能被改寫甚至編造 |
+| 結構化、依關鍵字聚焦的輸出 | 是 | 否 | 看 prompt 寫得好不好 |
+| 上手成本 | 一條指令 | 免安裝 | 要 API key,每次都要重新下 prompt |
+
+代價是:這是子字串比對,不是語意理解——見下方[限制](#目前的限制)。它是一個
+快速、誠實的初步結果,給你(或你的 coding agent)當起點,不是取代你自己去讀
+命中的 commit。
+
+## 快速開始
+
+不用 clone,先試試看:
+
+```bash
+pip install git+https://github.com/richardkuo2002/repo-chronicle.git
+```
+
+或是 clone 下來:
+
+```bash
+git clone https://github.com/richardkuo2002/repo-chronicle.git
+cd repo-chronicle
+pip install -e .
+```
+
+先對一個一次性、決定性的 fixture repo 試試看,不用拿真的專案冒險:
+
+```bash
+python examples/create_fixture_repo.py --keep
+# 印出 fixture repo 的路徑與 commit 清單,並保留在磁碟上
+repo-chronicle explain report --repo <上面印出的路徑>
+```
+
+這就是上面[實際成品長怎樣](#實際成品長怎樣)那段輸出背後的那條指令。區塊標題
+預設為英文,`--lang zh-TW` 可切換為繁體中文(commit 原文一律保持原語言不變)。
 
 對一個真實 repo:
 
