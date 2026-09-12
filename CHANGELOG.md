@@ -4,6 +4,8 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
 
+## [0.1.1] - 2026-09-12
+
 ### Added
 
 - `--lang en|zh-TW` flag: switches the generated report's section headers
@@ -62,4 +64,5 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
   sitting untracked in the *target* repository's working tree, one
   `git add -A` away from being committed by mistake.
 
+[0.1.1]: https://github.com/richardkuo2002/repo-chronicle/releases/tag/v0.1.1
 [0.1.0]: https://github.com/richardkuo2002/repo-chronicle/releases/tag/v0.1.0
