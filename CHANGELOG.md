@@ -6,10 +6,15 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
-- `--lang zh-TW|en` flag: switches the generated report's section headers
-  between Traditional Chinese (default, unchanged) and English. Commit
+- `--lang en|zh-TW` flag: switches the generated report's section headers
+  between English (default) and Traditional Chinese. Commit
   subjects/bodies and file paths are always reproduced verbatim regardless
   of this setting.
+
+### Changed
+
+- Generated report section headers now default to English (`--lang en`).
+  Pass `--lang zh-TW` to keep the previous Traditional Chinese headers.
 
 ## [0.1.0] - 2026-09-04
 

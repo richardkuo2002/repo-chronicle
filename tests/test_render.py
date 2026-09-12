@@ -128,30 +128,29 @@ class RenderIntegrationTest(unittest.TestCase):
         md = render(self._result(commits, affected), "/tmp/repo")
 
         self.assertIn("# Context Pack: auth", md)
-        self.assertIn("## 演進脈絡(依時間排序)", md)
+        self.assertIn("## Evolution (chronological)", md)
         self.assertIn("### 2024-01-02 `abc123abcd` — Fix auth token", md)
         self.assertIn("- `src/auth/token.py` (+3/-1)", md)
         self.assertIn("| `src/auth/token.py` | 1 | `abc123abcd` |", md)
-        self.assertIn("- `tests/auth/test_token.py`(對應 `src/auth/token.py`)", md)
-        self.assertIn("## 附註", md)
+        self.assertIn("- `tests/auth/test_token.py` (for `src/auth/token.py`)", md)
+        self.assertIn("## Notes", md)
 
 
 class RenderLangTest(unittest.TestCase):
-    def test_default_lang_is_byte_identical_to_pre_flag_output(self) -> None:
-        # 沒有傳 lang 參數時,輸出要跟原本寫死中文字串的版本完全一樣,不能因為
-        # 加了 --lang 就悄悄改變預設行為。
+    def test_default_lang_is_english(self) -> None:
+        # 預設輸出英文區塊標題;程式產出以英文為主,zh-TW 為顯式選項。
         result = ExplainResult(keyword="x", commits=[], affected_files=[])
         md = render(result, "/tmp/repo")
+        self.assertIn("## Evolution (chronological)", md)
+        self.assertNotIn("演進脈絡", md)
+
+    def test_lang_zh_tw_swaps_section_headers_not_keyword_or_paths(self) -> None:
+        result = ExplainResult(keyword="auth", commits=[], affected_files=[])
+        md = render(result, "/tmp/repo", lang="zh-TW")
         self.assertIn("## 演進脈絡(依時間排序)", md)
         self.assertIn("生成時間:", md)
-
-    def test_lang_en_swaps_section_headers_not_keyword_or_paths(self) -> None:
-        result = ExplainResult(keyword="auth", commits=[], affected_files=[])
-        md = render(result, "/tmp/repo", lang="en")
-        self.assertIn("## Evolution (chronological)", md)
-        self.assertIn("Generated:", md)
         self.assertIn("# Context Pack: auth", md)  # 關鍵字/標題格式不受 lang 影響
-        self.assertNotIn("演進脈絡", md)
+        self.assertNotIn("Evolution", md)
 
 
 if __name__ == "__main__":

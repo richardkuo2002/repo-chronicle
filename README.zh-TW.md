@@ -39,7 +39,8 @@ python examples/create_fixture_repo.py --keep
 repo-chronicle explain report --repo <上面印出的路徑>
 ```
 
-這正是那條指令的真實輸出(完整 walkthrough 與每個區塊代表的意思見
+以下是加上 `--lang zh-TW` 之後那條指令的真實輸出(區塊標題預設為英文,
+`--lang zh-TW` 切換為繁體中文;完整 walkthrough 與每個區塊代表的意思見
 [`examples/walkthrough.md`](examples/walkthrough.md)):
 
 ```markdown
@@ -95,7 +96,7 @@ repo-chronicle explain auth --repo /path/to/your/repo --out pack.md
 ## 指令參考
 
 ```text
-repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N]
+repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N] [--lang en|zh-TW]
 ```
 
 | 參數 | 意義 | 預設值 |
@@ -104,6 +105,7 @@ repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N]
 | `--repo` | 目標 repo 路徑(可以是根目錄、子目錄,或 worktree) | `.` |
 | `--out` | 輸出到這個檔案,不給就印到 stdout | stdout |
 | `--top` | 「可能受影響的檔案」表格最多列出幾筆 | `15` |
+| `--lang` | 報告區塊標題語言(`en` 或 `zh-TW`);不影響 commit 原文內容 | `en` |
 
 `--out FILE` 若目標檔案已存在會直接覆寫,不會要求確認。工具不會自動建立缺少的父目錄;`FILE` 可指定為任何可寫入的檔案路徑,不限於被分析 repository 內。
 

@@ -92,7 +92,7 @@ def _table_cell(text: str) -> str:
     return _code_span(text)
 
 
-def render(result: ExplainResult, repo_path: str, lang: str = "zh-TW") -> str:
+def render(result: ExplainResult, repo_path: str, lang: str = "en") -> str:
     t = _LABELS[lang]
     now = _dt.datetime.now().strftime("%Y-%m-%d %H:%M")
     lines = [

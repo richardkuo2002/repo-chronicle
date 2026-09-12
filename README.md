@@ -66,59 +66,54 @@ repo-chronicle explain report --repo <path printed above>
 
 Real output from that exact command (see
 [`examples/walkthrough.md`](examples/walkthrough.md) for the full walkthrough
-and what each section means). The section headers below are Traditional
-Chinese by default; pass `--lang en` for English section headers instead
-(commit subjects/bodies are always reproduced verbatim in their original
-language either way):
+and what each section means). Section headers are English by default; pass
+`--lang zh-TW` for Traditional Chinese headers instead (commit
+subjects/bodies are always reproduced verbatim in their original language
+either way):
 
 ```markdown
 # Context Pack: report
 
-生成時間:2026-09-04 03:31 | Repo: `/tmp/.../repo-chronicle-fixture-4vfri1jb` | 命中 commit 數:4
+Generated:2026-09-12 20:28 | Repo: `/tmp/.../repo-chronicle-fixture-zcy1o09t` | Matched commits:4
 
-## 演進脈絡(依時間排序)
+## Evolution (chronological)
 
 ### 2024-04-01 `e4900b7e08` — Add --json output, preserve default text output and exit codes
 
-受影響檔案:
+Files touched:
 - `report.py` (+18/-5)
 
 ### 2024-03-01 `1521a1e2da` — Avoid third-party runtime dependency for portability
 
-受影響檔案:
+Files touched:
 - `report.py` (+5/-4)
 
 ### 2024-02-01 `787d4bcf11` — Send diagnostics to stderr, keep stdout automation-safe
 
-受影響檔案:
+Files touched:
 - `report.py` (+9/-1)
 
 ### 2024-01-01 `7510ef4bd1` — Add text report command
 
-受影響檔案:
+Files touched:
 - `report.py` (+14/-0)
 
 ---
 
-## 可能受影響的檔案(依相關 commit 出現次數排序)
+## Likely Affected Files (by matched-commit frequency)
 
-| 檔案路徑 | 出現次數 | 最近變動 commit |
+| File | Occurrences | Sample commit |
 |---|---|---|
 | `report.py` | 4 | `e4900b7e08` |
 
-## 建議執行的測試
+## Suggested Tests to Run
 
-- ⚠ `report.py` 未偵測到對應測試檔,建議人工確認
+- ⚠ no matching test file found for `report.py` — verify manually
 
-## 附註
+## Notes
 
-本報告純規則式產生,未經語意分析,請以 commit hash 為準自行查證。
+This report is rule-based, not semantic analysis. Verify against the commit hashes shown.
 ```
-
-The generated Markdown's section headers are currently in Traditional
-Chinese (see the [Chinese README](README.zh-TW.md) for a fully native
-example); localizing the render output itself is a possible future change,
-not implemented in this release.
 
 On a real repository:
 
@@ -129,7 +124,7 @@ repo-chronicle explain auth --repo /path/to/your/repo --out pack.md
 ## Command reference
 
 ```text
-repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N] [--lang zh-TW|en]
+repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N] [--lang en|zh-TW]
 ```
 
 | Argument | Meaning | Default |
@@ -138,7 +133,7 @@ repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N] [--lang zh
 | `--repo` | path to the target repository (root, a subdirectory of one, or a worktree) | `.` |
 | `--out` | write the pack to this file instead of stdout | stdout |
 | `--top` | max rows in the "likely affected files" table | `15` |
-| `--lang` | section-header language for the generated report (`zh-TW` or `en`); never affects commit subjects/bodies, which are always reproduced verbatim | `zh-TW` |
+| `--lang` | section-header language for the generated report (`en` or `zh-TW`); never affects commit subjects/bodies, which are always reproduced verbatim | `en` |
 
 `--out FILE` overwrites an existing file without confirmation. Parent
 directories are not created automatically, and `FILE` may be any writable
@@ -168,16 +163,16 @@ today.
 
 The pack has four sections, in order:
 
-1. **演進脈絡 (evolution)** — direct evidence. One entry per matched commit:
+1. **Evolution** — direct evidence. One entry per matched commit:
    SHA, date, subject, the first lines of the body (quoted), and the files
    it touched with add/delete line counts from `git log --numstat`.
-2. **可能受影響的檔案 (likely affected files)** — a derived aggregation, not
+2. **Likely Affected Files** — a derived aggregation, not
    a single commit's evidence: how many matched commits touched each path,
    with one representative commit SHA. Read section 1 to see which commits.
-3. **建議執行的測試 (suggested tests)** — a filename-pattern heuristic
+3. **Suggested Tests to Run** — a filename-pattern heuristic
    (`test_x.py` / `x_test.py` / `x.test.js` / `x.spec.js`), not evidence. When
    it can't find a match it says so explicitly instead of staying silent.
-4. **附註 (notes)** — a fixed reminder that the report is rule-based and
+4. **Notes** — a fixed reminder that the report is rule-based and
    commit hashes are the thing to verify against.
 
 This release does not add frontmatter, schema versioning, or per-line
