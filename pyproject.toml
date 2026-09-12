@@ -2,8 +2,41 @@
 name = "repo-chronicle"
 version = "0.1.0"
 description = "Local-first Git history indexer that produces commit-evidenced Markdown context packs for AI coding agents."
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Jui-Huan Kuo", email = "richardkuo2002@gmail.com" },
+]
 requires-python = ">=3.10"
+keywords = [
+    "git",
+    "git-log",
+    "code-archaeology",
+    "context-pack",
+    "llm-context",
+    "developer-tools",
+    "cli",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: Software Development :: Documentation",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/richardkuo2002/repo-chronicle"
+Repository = "https://github.com/richardkuo2002/repo-chronicle"
+Issues = "https://github.com/richardkuo2002/repo-chronicle/issues"
+Changelog = "https://github.com/richardkuo2002/repo-chronicle/blob/main/CHANGELOG.md"
 
 [project.scripts]
 repo-chronicle = "repo_chronicle.cli:main"
