@@ -7,6 +7,8 @@
 
 [English](README.md) | [繁體中文](README.zh-TW.md)
 
+![Git history flowing through a keyword match into a commit-evidenced Markdown context pack](docs/hero.svg)
+
 ## Why it exists
 
 A coding assistant or a new contributor can read the current files in a repo,

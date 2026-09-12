@@ -4,6 +4,8 @@
 
 [English](README.md) | [繁體中文](README.zh-TW.md)
 
+![Git history 經過關鍵字比對後,產出附帶 commit 佐證的 Markdown context pack](docs/hero.svg)
+
 ## 為什麼需要它
 
 AI coding agent 或新加入的貢獻者能讀到 repo 目前的檔案內容,但讀不到「這段程式碼為什麼長這樣」的歷史脈絡:這個函式為什麼這樣寫?之前試過什麼、後來又改掉了?哪些檔案常常一起變動?這些答案其實都在 `git log` 裡,但原始的 `git log` 太廣、太沒結構,沒辦法直接拿給一次聚焦的修改用——結果通常是乾脆跳過歷史,或是自己一筆一筆翻 commit。
