@@ -1,0 +1,83 @@
+name: Tag, release, and publish on version bump
+
+# Runs only when pyproject.toml changes on main. If the version in it is new
+# (no matching git tag yet), creates the tag + GitHub Release from the
+# matching CHANGELOG.md section, then builds and publishes straight to PyPI
+# in this same job — not by relying on the created release to trigger
+# publish.yml separately, because a release created by GITHUB_TOKEN inside
+# an Actions run does not trigger other workflows (GitHub's loop-prevention
+# rule). publish.yml stays as the handler for a release created by hand
+# through the GitHub UI or a personal token.
+on:
+  push:
+    branches: [main]
+    paths:
+      - pyproject.toml
+
+permissions:
+  contents: write # to create the tag + release
+  id-token: write # for PyPI Trusted Publishing (OIDC)
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/repo-chronicle/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # need full history to check existing tags
+
+      - name: Read version from pyproject.toml
+        id: v
+        run: |
+          VERSION=$(grep -m1 '^version = ' pyproject.toml | sed -E 's/version = "(.*)"/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if this version was already tagged
+        id: check
+        run: |
+          if git rev-parse "${{ steps.v.outputs.tag }}" >/dev/null 2>&1; then
+            echo "This version's tag already exists — nothing to do."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract this version's CHANGELOG section
+        if: steps.check.outputs.exists == 'false'
+        id: notes
+        run: |
+          VERSION="${{ steps.v.outputs.version }}"
+          NOTES=$(awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { flag=1; next }
+            /^## \[/ { flag=0 }
+            flag
+          ' CHANGELOG.md)
+          {
+            echo "body<<NOTES_EOF"
+            if [ -n "$NOTES" ]; then echo "$NOTES"; else echo "No CHANGELOG.md entry found for $VERSION."; fi
+            echo "NOTES_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create tag and GitHub Release
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.v.outputs.tag }}" \
+            --title "${{ steps.v.outputs.tag }}" \
+            --notes "${{ steps.notes.outputs.body }}"
+
+      - name: Build sdist and wheel
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          python -m pip install --upgrade build twine
+          python -m build
+          twine check dist/*
+
+      - name: Publish to PyPI
+        if: steps.check.outputs.exists == 'false'
+        uses: pypa/gh-action-pypi-publish@release/v1
