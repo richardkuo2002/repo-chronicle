@@ -1,6 +1,7 @@
 # Repo Chronicle
 
 [![CI](https://github.com/richardkuo2002/repo-chronicle/actions/workflows/ci.yml/badge.svg)](https://github.com/richardkuo2002/repo-chronicle/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/repo-chronicle.svg)](https://pypi.org/project/repo-chronicle/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > Local-first Git history context packs for understanding a repository before changing it.
@@ -117,10 +118,8 @@ commits yourself.
 
 ## Quick start
 
-Try without cloning:
-
 ```bash
-pip install git+https://github.com/richardkuo2002/repo-chronicle.git
+pip install repo-chronicle
 ```
 
 Or clone it:

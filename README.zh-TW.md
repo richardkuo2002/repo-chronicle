@@ -91,10 +91,8 @@ AI coding agent 或新加入的貢獻者能讀到 repo 目前的檔案內容,但
 
 ## 快速開始
 
-不用 clone,先試試看:
-
 ```bash
-pip install git+https://github.com/richardkuo2002/repo-chronicle.git
+pip install repo-chronicle
 ```
 
 或是 clone 下來:
