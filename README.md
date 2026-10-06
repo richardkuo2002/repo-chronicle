@@ -116,6 +116,31 @@ The trade-off: it's substring matching, not understanding — see
 your coding assistant) build on, not a replacement for reading the matched
 commits yourself.
 
+## How this differs from giving an agent raw git access (MCP)
+
+A different category of tool — an MCP server that exposes `git log`,
+`git blame`, `git diff`, etc. as tools an AI agent can call directly
+([pastcode](https://github.com/muhcen/pastcode), GitHub's own MCP server,
+and others) — solves a related but different problem: letting the agent
+investigate history itself, one tool call at a time, deciding as it goes
+what to look at next.
+
+Repo Chronicle does the opposite: it produces the evidence pack *before*
+the agent starts reasoning, in one deterministic pass, so the agent (or
+you) reads a finished, commit-sourced artifact instead of re-discovering
+the same history from scratch on every session. Neither approach is
+strictly better — an MCP tool is the right choice when the investigation
+is open-ended and you want the agent driving; Repo Chronicle is the right
+choice when you already know the keyword/feature you're about to touch and
+want the relevant history summarized once, consistently, and checked into
+the review (a Markdown file survives in a PR description or a commit
+message in a way a tool-call transcript does not).
+
+They also compose: nothing stops an agent with MCP git access from calling
+`repo-chronicle explain <keyword>` as one of its tools, to get a
+pre-digested starting point instead of reconstructing one with several raw
+`git log` calls.
+
 ## Quick start
 
 ```bash

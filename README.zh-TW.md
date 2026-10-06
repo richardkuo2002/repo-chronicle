@@ -89,6 +89,25 @@ AI coding agent 或新加入的貢獻者能讀到 repo 目前的檔案內容,但
 快速、誠實的初步結果,給你(或你的 coding agent)當起點,不是取代你自己去讀
 命中的 commit。
 
+## 跟「給 agent 原始 git 存取權限」(MCP)有什麼不同
+
+另一類工具——把 `git log`、`git blame`、`git diff` 等包成 MCP tool 讓 AI
+agent 自己呼叫([pastcode](https://github.com/muhcen/pastcode)、GitHub
+官方 MCP server 等)——解決的是相關但不同的問題:讓 agent 自己一步步調查
+歷史,邊查邊決定下一步看什麼。
+
+Repo Chronicle 做的是相反的事:在 agent 開始推理之前,先用一次決定性的
+掃描產出證據包,讓 agent(或你)讀到的是一份已經做完、每句都有 commit
+來源的成品,而不是每個 session 都重新用好幾次原始 git 呼叫拼湊一次歷史。
+沒有哪個絕對更好——調查範圍本來就不確定、想讓 agent 自己主導時,MCP
+工具是對的選擇;已經知道要查的關鍵字/功能、想要一次拿到一致的歷史摘要時,
+Repo Chronicle 是對的選擇(一份 Markdown 檔案能留在 PR 說明或 commit
+message 裡,工具呼叫的過程紀錄留不下來)。
+
+兩者也可以搭配使用:有 MCP git 存取權限的 agent,完全可以把
+`repo-chronicle explain <keyword>` 當成自己的其中一個工具呼叫,先拿到一份
+整理好的起點,不用自己重新拼好幾次 `git log`。
+
 ## 快速開始
 
 ```bash
