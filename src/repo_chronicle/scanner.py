@@ -40,13 +40,21 @@ class Commit:
 def _run_git(args: list[str], repo_path: str) -> subprocess.CompletedProcess:
     """跑一條 git 指令,只把「找不到 git 執行檔」轉成明確例外;成功與否(returncode)
     交給呼叫者自己判斷,呼叫者才知道怎麼描述失敗才對使用者有意義。
+
+    明確指定 encoding="utf-8", errors="replace":舊專案或跨平台 commit
+    message 不保證是合法 UTF-8,先前用 text=True(依賴系統預設 encoding)
+    遇到無法解碼的位元組會直接丟 UnicodeDecodeError,讓整個 scan() 崩潰。
+    改用 errors="replace" 後,無法解碼的位元組換成 U+FFFD 替代字元,不拋例外
+    ——這是有損的(該位元組的原始內容救不回來),但「context pack 裡那幾個
+    字元變成 ),比「整個指令直接崩潰」好。
     """
     try:
         return subprocess.run(
             ["git", *args],
             cwd=repo_path,
             capture_output=True,
-            text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except FileNotFoundError as exc:
         raise GitNotFoundError("git executable not found") from exc

@@ -135,6 +135,19 @@ class RenderIntegrationTest(unittest.TestCase):
         self.assertIn("- `tests/auth/test_token.py` (for `src/auth/token.py`)", md)
         self.assertIn("## Notes", md)
 
+    def test_truncated_result_shows_warning_before_evolution_section(self) -> None:
+        result = ExplainResult(
+            keyword="auth", commits=[], affected_files=[], truncated=True, max_commits=200,
+        )
+        md = render(result, "/tmp/repo")
+        self.assertIn("More commits matched this keyword than the query limit (200)", md)
+        # 警告要出現在 Evolution 區塊之前,不是事後補一句不起眼的註腳。
+        self.assertLess(md.index("query limit"), md.index("## Evolution"))
+
+    def test_not_truncated_result_has_no_warning(self) -> None:
+        md = render(self._result([], []), "/tmp/repo")
+        self.assertNotIn("query limit", md)
+
 
 class RenderLangTest(unittest.TestCase):
     def test_default_lang_is_english(self) -> None:

@@ -153,7 +153,7 @@ repo-chronicle explain auth --repo /path/to/your/repo --out pack.md
 ## Command reference
 
 ```text
-repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N] [--lang en|zh-TW]
+repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N] [--max-commits N] [--lang en|zh-TW]
 ```
 
 | Argument | Meaning | Default |
@@ -162,6 +162,7 @@ repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N] [--lang en
 | `--repo` | path to the target repository (root, a subdirectory of one, or a worktree) | `.` |
 | `--out` | write the pack to this file instead of stdout | stdout |
 | `--top` | max rows in the "likely affected files" table | `15` |
+| `--max-commits` | max matched commits to include; a very common keyword in a large repo can otherwise match without bound. `0` means no limit. When the real match count exceeds this, the report says so instead of silently showing a partial list | `200` |
 | `--lang` | section-header language for the generated report (`en` or `zh-TW`); never affects commit subjects/bodies, which are always reproduced verbatim | `en` |
 
 `--out FILE` overwrites an existing file without confirmation. Parent

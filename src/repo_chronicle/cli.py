@@ -53,7 +53,8 @@ def _cmd_explain(args: argparse.Namespace) -> int:
 
         db_mod.index_repo(conn, commits)
 
-        result = explain(conn, args.keyword, top_n=args.top)
+        max_commits = args.max_commits if args.max_commits > 0 else None
+        result = explain(conn, args.keyword, top_n=args.top, max_commits=max_commits)
         output = render(result, repo_path, lang=args.lang)
 
     if args.out:
@@ -78,6 +79,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_explain.add_argument("--repo", default=".", help="目標 git repo 路徑(預設當前目錄)")
     p_explain.add_argument("--out", default=None, help="輸出檔案路徑(預設印到 stdout)")
     p_explain.add_argument("--top", type=int, default=15, help="受影響檔案列出的數量上限(預設 15)")
+    p_explain.add_argument(
+        "--max-commits", type=int, default=200,
+        help="符合關鍵字的 commit 數量上限,避免太常見的關鍵字在大型 repo 裡"
+             "撐爆輸出(預設 200)。設 0 或負數代表不設上限。",
+    )
     p_explain.add_argument(
         "--lang", choices=["en", "zh-TW"], default="en",
         help="Language for generated section headers (default: en; commit content is always verbatim)",
