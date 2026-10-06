@@ -64,6 +64,35 @@ class ExplainAgainstFixtureTest(unittest.TestCase):
             for c in unmatched:
                 self.assertNotIn(c.sha[:10], out, "不相關的 commit 不該混進結果")
 
+    def test_max_commits_caps_results_and_warns(self) -> None:
+        with fixture_repo() as (repo_path, commits):
+            # "report" matches all 4 fixture commits; cap to 1 so the output
+            # must be visibly truncated, not silently shortened.
+            code, out, err = _run_cli(
+                ["explain", "report", "--repo", repo_path, "--max-commits", "1"]
+            )
+            self.assertEqual(code, 0, err)
+            # fixture_repo()'s commits list is oldest-first (see its own
+            # module docstring / test_matched_commit_evidence's use of
+            # reversed(commits) to get newest-first) — the last element is
+            # the newest.
+            newest = commits[-1]
+            self.assertIn(newest.sha[:10], out)
+            older = commits[:-1]
+            for c in older:
+                self.assertNotIn(c.sha[:10], out, "capped result should not include older matches")
+            self.assertIn("query limit (1)", out)
+
+    def test_max_commits_zero_means_unlimited(self) -> None:
+        with fixture_repo() as (repo_path, commits):
+            code, out, err = _run_cli(
+                ["explain", "report", "--repo", repo_path, "--max-commits", "0"]
+            )
+            self.assertEqual(code, 0, err)
+            for c in commits:
+                self.assertIn(c.sha[:10], out)
+            self.assertNotIn("query limit", out)
+
     def test_output_is_deterministic_ignoring_timestamp_line(self) -> None:
         with fixture_repo() as (repo_path, _commits):
             _, out1, _ = _run_cli(["explain", "report", "--repo", repo_path])

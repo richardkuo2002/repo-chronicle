@@ -57,11 +57,20 @@ def index_repo(conn: sqlite3.Connection, commits) -> None:
     conn.commit()
 
 
-def search_commits(conn: sqlite3.Connection, keyword: str) -> list[sqlite3.Row]:
-    """依 message 或檔案路徑關鍵字找相關 commit,依時間新到舊排序。"""
+def search_commits(
+    conn: sqlite3.Connection, keyword: str, limit: int | None = None
+) -> tuple[list[sqlite3.Row], bool]:
+    """依 message 或檔案路徑關鍵字找相關 commit,依時間新到舊排序。
+
+    回傳 (rows, truncated)。limit 為 None 時不設上限(既有行為不變)。
+    limit 給定時,實際向 SQL 要 limit+1 筆:多要的那一筆只用來判斷「是不是
+    真的還有更多」,不會出現在回傳的 rows 裡——這樣不用多跑一次 COUNT(*)
+    查詢就能誠實回報「結果被截斷了」,而不是默默吐出一個看起來完整、其實
+    被砍過的清單。
+    """
     like = f"%{keyword}%"
-    rows = conn.execute(
-        """
+    fetch_n = None if limit is None else limit + 1
+    query = """
         SELECT DISTINCT c.hash, c.author, c.committed_at, c.subject, c.body
         FROM commits c
         WHERE c.subject LIKE ? COLLATE NOCASE
@@ -70,10 +79,17 @@ def search_commits(conn: sqlite3.Connection, keyword: str) -> list[sqlite3.Row]:
                SELECT hash FROM commit_files WHERE path LIKE ? COLLATE NOCASE
            )
         ORDER BY c.committed_at DESC
-        """,
-        (like, like, like),
-    ).fetchall()
-    return rows
+    """
+    params: tuple = (like, like, like)
+    if fetch_n is not None:
+        query += " LIMIT ?"
+        params = (*params, fetch_n)
+    rows = conn.execute(query, params).fetchall()
+
+    if limit is None:
+        return rows, False
+    truncated = len(rows) > limit
+    return rows[:limit], truncated
 
 
 def files_for_commits(conn: sqlite3.Connection, hashes: list[str], top_n: int) -> list[sqlite3.Row]:
@@ -148,8 +164,13 @@ def _self_check() -> None:
     ]
     index_repo(conn, commits)
 
-    hits = search_commits(conn, "auth")
+    hits, truncated = search_commits(conn, "auth")
     assert [r["hash"] for r in hits] == ["h1", "h2"], hits
+    assert truncated is False
+
+    limited_hits, limited_truncated = search_commits(conn, "auth", limit=1)
+    assert [r["hash"] for r in limited_hits] == ["h1"], limited_hits
+    assert limited_truncated is True
 
     files = files_for_commits(conn, ["h1", "h2"], top_n=10)
     assert files[0]["path"] == "src/auth/token.py" and files[0]["occurrences"] == 2, files

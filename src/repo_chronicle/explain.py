@@ -38,6 +38,8 @@ class ExplainResult:
     keyword: str
     commits: list[CommitEntry]
     affected_files: list[AffectedFile]
+    truncated: bool = False
+    max_commits: int | None = None
 
 
 def _guess_test_candidates(path: str, known_paths: list[str]) -> list[str]:
@@ -54,8 +56,15 @@ def _guess_test_candidates(path: str, known_paths: list[str]) -> list[str]:
     return sorted(set(candidates))
 
 
-def explain(conn: sqlite3.Connection, keyword: str, top_n: int = 15) -> ExplainResult:
-    hit_rows = db_mod.search_commits(conn, keyword)
+def explain(
+    conn: sqlite3.Connection, keyword: str, top_n: int = 15, max_commits: int | None = 200
+) -> ExplainResult:
+    """max_commits 預設 200,避免一個太常見的關鍵字在大型 repo 裡把整個
+    commits 清單撐到無上限大——這份清單最終是要餵給 AI agent 當 context
+    的,大小本身就是成本,不能只靠「反正 render 時只顯示前 20 筆」放著不管
+    (render 顯示前還是要先對每一筆都查一次 files_for_commit(),無上限等於
+    無上限的 DB 查詢數)。傳 None 關掉上限,回到舊行為。"""
+    hit_rows, truncated = db_mod.search_commits(conn, keyword, limit=max_commits)
     commits = [
         CommitEntry(
             hash=r["hash"],
@@ -81,7 +90,10 @@ def explain(conn: sqlite3.Connection, keyword: str, top_n: int = 15) -> ExplainR
         for r in file_rows
     ]
 
-    return ExplainResult(keyword=keyword, commits=commits, affected_files=affected)
+    return ExplainResult(
+        keyword=keyword, commits=commits, affected_files=affected,
+        truncated=truncated, max_commits=max_commits,
+    )
 
 
 def _self_check() -> None:
@@ -118,6 +130,7 @@ def _self_check() -> None:
 
     result = explain(conn, "auth", top_n=10)
     assert [c.hash for c in result.commits] == ["h1", "h2"], result.commits
+    assert result.truncated is False
     assert result.affected_files[0].path == "src/auth/token.py"
     assert result.affected_files[0].occurrences == 2
 
@@ -126,6 +139,11 @@ def _self_check() -> None:
 
     readme_entry_missing = all(f.path != "README.md" for f in result.affected_files)
     assert readme_entry_missing  # 不相關的 commit 不該混進來
+
+    capped = explain(conn, "auth", max_commits=1)
+    assert [c.hash for c in capped.commits] == ["h1"], capped.commits  # 最新的那筆
+    assert capped.truncated is True
+    assert capped.max_commits == 1
 
     conn.close()
     print("explain._self_check: OK")

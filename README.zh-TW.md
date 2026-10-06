@@ -123,7 +123,7 @@ repo-chronicle explain auth --repo /path/to/your/repo --out pack.md
 ## 指令參考
 
 ```text
-repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N] [--lang en|zh-TW]
+repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N] [--max-commits N] [--lang en|zh-TW]
 ```
 
 | 參數 | 意義 | 預設值 |
@@ -132,6 +132,7 @@ repo-chronicle explain <keyword> [--repo PATH] [--out FILE] [--top N] [--lang en
 | `--repo` | 目標 repo 路徑(可以是根目錄、子目錄,或 worktree) | `.` |
 | `--out` | 輸出到這個檔案,不給就印到 stdout | stdout |
 | `--top` | 「可能受影響的檔案」表格最多列出幾筆 | `15` |
+| `--max-commits` | 符合關鍵字的 commit 數量上限;太常見的關鍵字在大型 repo 裡否則會無上限成長。`0` 代表不設上限。真實命中數超過這個值時,報告會明確說明,不會默默只顯示一部分 | `200` |
 | `--lang` | 報告區塊標題語言(`en` 或 `zh-TW`);不影響 commit 原文內容 | `en` |
 
 `--out FILE` 若目標檔案已存在會直接覆寫,不會要求確認。工具不會自動建立缺少的父目錄;`FILE` 可指定為任何可寫入的檔案路徑,不限於被分析 repository 內。

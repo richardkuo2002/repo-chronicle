@@ -4,6 +4,24 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## Unreleased
 
+Two fixes from a council-style code review that looked at actual source,
+not just directory structure:
+
+### Fixed
+
+- `scan()` raised `UnicodeDecodeError` and crashed entirely when a
+  repository's git history contained a commit message with bytes that
+  aren't valid UTF-8 (not uncommon in older or cross-platform repos — git
+  itself does not enforce commit-message encoding at the object level).
+  `_run_git` now decodes with `errors="replace"`, substituting U+FFFD for
+  undecodable bytes instead of raising.
+- `explain()`'s matched-commit list had no upper bound — a common keyword
+  in a large repository could match without limit, and every matched
+  commit triggers its own `files_for_commit()` query. Added `--max-commits`
+  (default `200`, `0` disables it); when the real match count exceeds it,
+  the generated report says so explicitly instead of silently showing a
+  partial list.
+
 ## [0.1.1] - 2026-09-12
 
 ### Added

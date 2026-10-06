@@ -33,6 +33,7 @@ _LABELS = {
         "no_test_found": "⚠ {file} 未偵測到對應測試檔,建議人工確認",
         "notes_section_header": "## 附註",
         "notes_text": "本報告純規則式產生,未經語意分析,請以 commit hash 為準自行查證。",
+        "query_truncated": "⚠ 符合關鍵字的 commit 數超過查詢上限({n}),以下只包含最近 {n} 筆——可能還有更舊的相關 commit 沒列出,換更精確的關鍵字查詢可縮小範圍。",
     },
     "en": {
         "generated_at": "Generated",
@@ -50,6 +51,7 @@ _LABELS = {
         "no_test_found": "⚠ no matching test file found for {file} — verify manually",
         "notes_section_header": "## Notes",
         "notes_text": "This report is rule-based, not semantic analysis. Verify against the commit hashes shown.",
+        "query_truncated": "⚠ More commits matched this keyword than the query limit ({n}) — only the most recent {n} are included below. There may be older matching commits not shown; a more specific keyword narrows this.",
     },
 }
 
@@ -100,6 +102,11 @@ def render(result: ExplainResult, repo_path: str, lang: str = "en") -> str:
         "",
         f"{t['generated_at']}:{now} | {t['repo']}: {_code_span(repo_path)} | {t['hits']}:{len(result.commits)}",
         "",
+    ]
+    if result.truncated and result.max_commits is not None:
+        lines.append(t["query_truncated"].format(n=result.max_commits))
+        lines.append("")
+    lines += [
         t["evolution_header"],
         "",
     ]
