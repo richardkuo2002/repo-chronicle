@@ -22,6 +22,15 @@ not just directory structure:
   the generated report says so explicitly instead of silently showing a
   partial list.
 
+### Documentation
+
+- README (English + Traditional Chinese): added a section contrasting
+  Repo Chronicle with MCP servers that give an agent raw `git log`/
+  `git blame`/`git diff` tool access (e.g. pastcode, GitHub's own MCP
+  server) — a different philosophy (agent-driven investigation vs. a
+  pre-built evidence pack), not a competing replacement; the two can be
+  used together.
+
 ## [0.1.1] - 2026-09-12
 
 ### Added
